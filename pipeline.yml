@@ -1,0 +1,16 @@
+build-app:
+  image: instrumentisto/flutter
+  stage: build
+  script:
+    - cd frontend
+    - touch .env
+    - flutter pub get
+    - flutter build apk
+  tags:
+    - docker
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - $CI_PROJECT_DIR/frontend/.dart_tool/
+      - $CI_PROJECT_DIR/frontend/build/
+      - $CI_PROJECT_DIR/frontend/android/.gradle/
