@@ -1,0 +1,54 @@
+# Based on:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Gradle.gitlab-ci.yml
+
+# Simply checks if the project can be built.
+
+# use the gradle docker image to make sure that gradle is installed on the machine
+
+build-server:
+  image: gradle:alpine
+  stage: build
+  script:
+    - GRADLE_USER_HOME="$(pwd)/.gradle"
+    - export GRADLE_USER_HOME
+    - cd server # go into server directory, as this is the entry point for the pipeline
+    - gradle --build-cache assemble
+  tags:
+    - docker
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - server/build/
+      - server/.gradle/
+
+# Based on:
+# https://www.youtube.com/watch?v=H0WiDqhDIOs
+
+server_code_tests:
+  stage: test
+  image: gradle:alpine
+  script:
+    - GRADLE_USER_HOME="$(pwd)/.gradle"
+    - export GRADLE_USER_HOME
+    - cd server
+    - gradle --build-cache assemble
+    - java -jar build/libs/plant-stein-server-0.0.1-SNAPSHOT.jar &
+    - PID=$!
+    - apk add --update npm
+    - npm install -g newman newman-reporter-html newman-reporter-junitfull
+    - newman run Server.postman_collection.json -e "Plant Stein Environment.postman_environment.json" --delay-request 100 --reporters cli,html,junitfull --reporter-html-export ../report.html --reporter-junitfull-export ../report.xml
+    - kill $PID
+  tags:
+    - docker
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - $CI_PROJECT_DIR/server/build/
+      - $CI_PROJECT_DIR/server/.gradle/
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/report.html
+      - $CI_PROJECT_DIR/report.xml
+    reports:
+      junit: $CI_PROJECT_DIR/report.xml
+    when: always

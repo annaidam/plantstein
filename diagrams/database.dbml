@@ -1,0 +1,60 @@
+// Docs: https://www.dbml.org/docs
+
+// All temperature values in celsius
+Table species {
+  name varchar [pk]
+  perfect_temperature double
+  perfect_light_per_day double
+  perfect_humidity double
+  perfect_moisture double
+  botanical_name varchar
+  bloom_time varchar
+  homeland varchar
+  max_height double
+}
+
+Table room {
+  id long [pk]
+  name varchar 
+  client_id varchar 
+  
+}
+
+Table room_timeseries_data {
+  id long [pk]
+  room Room 
+  timestamp timestamp 
+  temperature double
+  brightness double
+  humidity double
+}
+
+Ref: room_timeseries_data.room > room.id
+
+// One plant of the user
+Table plant {
+  id long [pk]
+  nickname varchar
+  room Room
+  species Species
+}
+
+Ref: plant.room > room.id
+Ref: plant.species > species.name
+
+Table plant_timeseries_data {
+  id long [pk]
+  plant Plant 
+  timestamp timestamp
+  moisture Moisture
+}
+
+Ref: plant_timeseries_data.plant > plant.id
+
+
+
+
+
+
+
+

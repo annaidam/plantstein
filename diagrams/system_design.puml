@@ -1,0 +1,48 @@
+@startuml System Design
+left to right direction
+
+component "Microcontroller"
+note top of Microcontroller
+publish sensor data on /timeseries (JSON)
+end note
+
+note bottom of Microcontroller
+subscribe to /plant-conditions
+end note
+
+' component "Temperature Sensor" as TemperatureSensor
+component "Temperature & Humidity Sensor" as TemperatureHumiditySensor
+component "Moisture Sensor" as MoistureSensor
+component "Light Sensor" as LightSensor
+component "Speaker" as Speaker
+' component "Speaker" as Speaker
+
+component Server
+
+note top of Server
+publish on /plant-conditions (JSON)
+end note
+
+note bottom of Server
+subscribe to /timeseries
+end note
+
+component App
+database Database
+
+' TemperatureSensor --> Microcontroller : Sensor data
+TemperatureHumiditySensor --> Microcontroller : Sensor data
+MoistureSensor  --> Microcontroller : Sensor data
+LightSensor --> Microcontroller : Sensor data
+Speaker <-- Microcontroller : Alert
+' Speaker <-- Microcontroller : Alert
+
+Microcontroller --> Server : Transmit sensor data over MQTT
+
+Server <--> Database
+    
+Server <--> App : REST API
+
+Server ---> Microcontroller : Send alerts over MQTT
+
+@enduml
