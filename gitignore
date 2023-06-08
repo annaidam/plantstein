@@ -1,0 +1,6 @@
+.vscode/
+.idea/
+.DS_Store
+/microcontroller/WiFi.h
+
+# The list will be extended once we have decided on which technologies to use, so we know which files to exclude
